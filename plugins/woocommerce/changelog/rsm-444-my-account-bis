@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a "Back in Stock Notifications" tab to My Account so customers can view and cancel their own sign-ups. Cancelling here records `cancellation_source = my-account` (a new enum value distinct from `user`, which the email-link unsubscribe still uses). Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
