@@ -138,7 +138,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
 		$this->assertSame( NotificationStatus::CANCELLED, $updated->get_status() );
-		$this->assertSame( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
+		$this->assertSame( NotificationCancellationSource::MY_ACCOUNT, $updated->get_cancellation_source() );
 	}
 
 	/**

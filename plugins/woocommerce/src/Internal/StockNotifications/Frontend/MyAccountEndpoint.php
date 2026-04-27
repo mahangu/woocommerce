@@ -226,7 +226,7 @@ class MyAccountEndpoint {
 		}
 
 		$notification->set_status( NotificationStatus::CANCELLED );
-		$notification->set_cancellation_source( NotificationCancellationSource::USER );
+		$notification->set_cancellation_source( NotificationCancellationSource::MY_ACCOUNT );
 		$notification->set_date_cancelled( time() );
 		$notification->save();
 
