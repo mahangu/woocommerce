@@ -149,6 +149,36 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 }
 
 /**
+ * Get the tokenized Review Order URL for the given order.
+ *
+ * Mirrors the pay-for-order URL shape so the link works for guest customers
+ * via the order key. Returns a path-style URL on pretty permalinks and a
+ * query-arg URL on plain permalinks.
+ *
+ * @since 10.8.0
+ * @param  WC_Order $order Order object.
+ * @return string
+ */
+function wc_get_review_order_url( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return '';
+	}
+
+	$url = wc_get_endpoint_url( 'review-order', (string) $order->get_id(), wc_get_checkout_url() );
+	$url = add_query_arg( 'key', $order->get_order_key(), $url );
+
+	/**
+	 * Filter the Review Order URL that the review-request email links to.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string   $url   The review-order URL.
+	 * @param WC_Order $order The order object.
+	 */
+	return (string) apply_filters( 'woocommerce_review_order_url', $url, $order );
+}
+
+/**
  * Hide or adjust menu items conditionally.
  *
  * @param array $items Navigation items.

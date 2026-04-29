@@ -65,6 +65,10 @@ class WC_Shortcode_Checkout {
 
 			self::order_received( $wp->query_vars['order-received'] );
 
+		} elseif ( ! empty( $wp->query_vars['review-order'] ) ) {
+
+			self::review_order( $wp->query_vars['review-order'] );
+
 		} else {
 
 			self::checkout();
@@ -331,6 +335,94 @@ class WC_Shortcode_Checkout {
 
 		// Otherwise, display the thank you (order received) page.
 		wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Show the Review Order page.
+	 *
+	 * Tokenized landing page that lets a customer review the products they
+	 * purchased. The corresponding email is sent by `WC_Email_Customer_Review_Request`
+	 * a configurable number of days after the order is marked complete.
+	 *
+	 * Any failed gating check 404s rather than redirecting, so a leaked or
+	 * stale link does not disclose order existence.
+	 *
+	 * @since 10.8.0
+	 * @param int $order_id Order ID.
+	 */
+	private static function review_order( $order_id ): void {
+		$order_id = absint( $order_id );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only landing page.
+		$order_key = ( isset( $_GET['key'] ) && is_string( $_GET['key'] ) ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : '';
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $order instanceof WC_Order ) {
+			self::review_order_404();
+			return;
+		}
+
+		$is_valid = (
+			$order->get_id() === $order_id
+			&& is_string( $order_key )
+			&& '' !== $order_key
+			&& hash_equals( $order->get_order_key(), $order_key )
+		);
+
+		if ( $is_valid ) {
+			/**
+			 * Filter the order statuses that are eligible to access the Review Order page.
+			 *
+			 * The scheduler only enqueues the email on `completed`, but an order can move
+			 * out of that set after the email is delivered (refund, cancel, trash). The
+			 * route-level check blocks those late clicks even though the email itself
+			 * cannot be unsent.
+			 *
+			 * @since 10.8.0
+			 *
+			 * @param string[] $eligible_statuses Status slugs without the `wc-` prefix.
+			 * @param WC_Order $order             The order being reviewed.
+			 */
+			$eligible_statuses = (array) apply_filters(
+				'woocommerce_review_order_eligible_statuses',
+				array( OrderStatus::COMPLETED ),
+				$order
+			);
+
+			if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
+				$is_valid = false;
+			}
+		}//end if
+
+		if ( $is_valid && $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
+			$is_valid = false;
+		}
+
+		if ( ! $is_valid ) {
+			self::review_order_404();
+			return;
+		}
+
+		wc_get_template( 'checkout/customer-review-order.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Mark the current request as a 404 and load the theme's 404 template if available.
+	 *
+	 * Used by `review_order()` to fail closed on every gating check so a stale
+	 * or tampered link cannot disclose order existence.
+	 *
+	 * @since 10.8.0
+	 */
+	private static function review_order_404(): void {
+		global $wp_query;
+
+		$wp_query->set_404();
+		status_header( 404 );
+
+		$template = get_query_template( '404' );
+		if ( ! empty( $template ) && file_exists( $template ) ) {
+			include $template;
+		}
 	}
 
 	/**

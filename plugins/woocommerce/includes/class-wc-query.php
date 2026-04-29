@@ -89,6 +89,7 @@ class WC_Query {
 			// Checkout actions.
 			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'review-order'               => get_option( 'woocommerce_checkout_review_order_endpoint', 'review-order' ),
 			// My account actions.
 			'orders'                     => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'                 => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
@@ -123,6 +124,9 @@ class WC_Query {
 				break;
 			case 'order-received':
 				$title = __( 'Order received', 'woocommerce' );
+				break;
+			case 'review-order':
+				$title = __( 'Review your order', 'woocommerce' );
 				break;
 			case 'orders':
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
