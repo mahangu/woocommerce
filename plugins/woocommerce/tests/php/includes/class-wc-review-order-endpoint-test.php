@@ -1,16 +1,11 @@
 <?php
-/**
- * Tests for the Review Order checkout endpoint, gating handler, and
- * `wc_get_review_order_url()` helper.
- *
- * @package WooCommerce\Tests\ReviewOrder
- */
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
- * @testdox Review Order endpoint, gating, and URL helper.
+ * Tests for the Review Order checkout endpoint, gating handler, and `wc_get_review_order_url()` helper.
  */
 class WC_Review_Order_Endpoint_Test extends WC_Unit_Test_Case {
 

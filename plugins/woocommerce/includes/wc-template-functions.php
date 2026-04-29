@@ -35,8 +35,17 @@ function wc_template_redirect() {
 	}
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
+	/**
+	 * Filter whether to redirect to the cart when the checkout page has an empty cart.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $redirect Whether to redirect. Defaults to true.
+	 */
+	$redirect_empty_cart = apply_filters( 'woocommerce_checkout_redirect_empty_cart', true );
+
 	// When on the checkout with an empty cart, redirect to cart page.
-	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
+	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && empty( $wp->query_vars['review-order'] ) && ! is_customize_preview() && $redirect_empty_cart ) {
 		// Only redirect if we're not already on the cart page to prevent infinite loops.
 		if ( ! is_cart() ) {
 			wp_safe_redirect( wc_get_cart_url() );
